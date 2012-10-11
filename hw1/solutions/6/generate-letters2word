@@ -1,0 +1,54 @@
+#!/bin/bash
+scala "$0" "$@"
+carmel -v letters2word.fst > letters2word-invert.fst
+exit
+!#
+
+val vocab_path = "../../vocab"
+val fst_path = "./letters2word.fst"
+
+val start_state = "^"
+val final_state = "$"
+
+case class Transition(from: String, to:String, input: String, output: String){
+  override def toString = {
+    val input_str = input match {
+      case null => "*e*"
+      case _ => "\"" + input + "\""
+    }
+    val output_str = output match {
+      case null => "*e*"
+      case _ => "\"" + output + "\""
+    }
+
+    "(%s (%s %s %s))".format(from, to, input_str, output_str)
+  }
+}
+
+def wordToTransitions(tokens: List[String]): List[Transition] = {
+  @annotation.tailrec
+  def helper(prev: String, remains: List[String], acc: List[Transition]): List[Transition] =
+    remains match {
+      case head::tail =>
+        val curr = prev + head
+        helper(curr, tail, Transition(prev, curr, head, null)::acc)
+      case nil =>
+        Transition(prev, final_state, null, prev.substring(1)) :: acc
+    }
+
+  helper(start_state, tokens, List())
+}
+
+val transitions = io.Source.fromFile(vocab_path).getLines().
+  map(_.split(" ").toList).flatMap(wordToTransitions).
+  toSet.
+  +(Transition(final_state, start_state, "_", null)).
+  groupBy((x: Transition) => x.from)
+
+val writer = new java.io.PrintWriter(fst_path)
+writer.println(final_state)
+
+transitions(start_state).foreach(writer.println _)
+transitions.filterKeys(start_state !=).values.flatten.foreach(writer.println _)
+
+writer.close()

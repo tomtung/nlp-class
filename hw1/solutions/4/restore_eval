@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cat ../3/strings.novowels | carmel -sribIEWk 1 ../3/remove-vowels.fst > strings.restored
+
+python ../../eval.py ../../strings ./strings.restored

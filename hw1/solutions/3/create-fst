@@ -1,0 +1,17 @@
+#!/bin/bash
+scala "$0" "$@"
+cat ../../strings | carmel -slibOEWk 1 remove-vowels.fst > strings.novowels
+exit
+!#
+
+val fst_path = "./remove-vowels.fst"
+
+val vowels = Set('A', 'E', 'I', 'O', 'U')
+val nonvowels = ('A' to 'Z').filterNot(vowels).toSet + '\'' + '_'
+
+val writer = new java.io.PrintWriter(fst_path)
+writer.println("S")
+vowels.map("""(S (S "%c" *e*))""".format(_)).foreach(writer.println)
+nonvowels.map(c => """(S (S "%c" "%c"))""".format(c, c)).foreach(writer.println)
+
+writer.close()

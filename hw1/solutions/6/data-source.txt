@@ -1,0 +1,8 @@
+Training data is collected from:
+http://nlp.stanford.edu/courses/cs224n/2000/jpaul2/AppendixB.txt
+http://courses.washington.edu/ling571/ling571_WIN2011/hw/sents.test
+http://archive.lib.msu.edu/RECYCLER/S-1-5-21-1454471165-57989841-1417001333-1387/Df3/atis/atis3
+http://en.wikipedia.org/wiki/List_of_United_States_cities_by_population
+http://en.wikipedia.org/wiki/U.S._state
+
+Sentences that have appeared in the file "strings" have been removed.
