@@ -191,11 +191,11 @@ def computeForwardBackwardImpl(indexedCorpus: Seq[IndexedSeq[Int]],
   else {
     val new_model = {
       // Container for collecting partial counts for t
-      val c_t = IndexedSeq.fill(nTag + 1)(mutable.IndexedSeq.fill(nTag + 1)(0.0))
+      val c_t = IndexedSeq.fill(nTag + 1)(mutable.IndexedSeq.fill(nTag + 1)(Double.NegativeInfinity))
       // Container for collecting partial counts for b
       val c_b =
         mutable.IndexedSeq.fill(words.size)(Double.NaN) +:
-          IndexedSeq.fill(nTag)(mutable.IndexedSeq.fill(words.size)(0.0))
+          IndexedSeq.fill(nTag)(mutable.IndexedSeq.fill(words.size)(Double.NegativeInfinity))
 
       ex_α_β_logProb.foreach({
         case (ex, α, β, logProb) =>
@@ -207,7 +207,7 @@ def computeForwardBackwardImpl(indexedCorpus: Seq[IndexedSeq[Int]],
             c_t(tag1)(0) =
               logPlus(c_t(tag1)(0),
                 α(ex.size - 1)(tag1) + t(tag1)(0) - logProb)
-            for (i <- 1 to ex.size - 2; tag2 <- model.tags) {
+            for (i <- 0 to ex.size - 2; tag2 <- model.tags) {
               c_t(tag1)(tag2) =
                 logPlus(c_t(tag1)(tag2),
                   α(i)(tag1) + t(tag1)(tag2) + b(tag2)(ex(i + 1)) + β(i + 1)(tag2) - logProb)
