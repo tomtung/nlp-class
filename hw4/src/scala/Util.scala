@@ -9,7 +9,7 @@ object Util {
     val l_larger = math.max(l1, l2)
     val l_smaller = math.min(l1, l2)
     if (l_smaller.isNegInfinity) l_larger
-    else if (l_larger - l_smaller > 32) l_larger
+    else if (l_larger - l_smaller > 64) l_larger
     else l_larger + log(1 + math.exp(l_smaller - l_larger))
   }
 }
