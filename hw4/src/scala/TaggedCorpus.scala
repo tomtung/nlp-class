@@ -2,13 +2,15 @@ import collection.immutable.IndexedSeq
 
 class TaggedCorpus(exampleIter: => Iterator[IndexedSeq[(String, String)]]) {
 
-  val examples = exampleIter.toList
+  val examples: List[IndexedSeq[(String, String)]] = exampleIter.toList
 
   val (wordToTags: Map[String, Set[String]], tags: Set[String]) = {
     val initWordToTags = Map[String, Set[String]]().withDefaultValue(Set[String]())
     val initTags = Set[String]()
-    examples.flatten.map({case(w,t) => (w.toLowerCase, t)}). // Case-insensitive
-      foldLeft((initWordToTags, initTags))({
+    examples.flatten.map({
+      // Case-insensitive
+      case (w, t) => (w.toLowerCase, t)
+    }).foldLeft((initWordToTags, initTags))({
       case ((w2ts, ts), (w, t)) =>
         val tsOfw = w2ts(w) + t
         (w2ts.updated(w, tsOfw), ts + t)
@@ -16,6 +18,10 @@ class TaggedCorpus(exampleIter: => Iterator[IndexedSeq[(String, String)]]) {
   }
 
   val words = wordToTags.keySet
+
+  val wordFreq = examples.flatten.groupBy(_._1.toLowerCase).mapValues(_.size).withDefaultValue(0)
+
+  val tagsFreq = examples.flatten.groupBy(_._2).mapValues(_.size)
 }
 
 object TaggedCorpus {

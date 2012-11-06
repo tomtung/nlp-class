@@ -1,9 +1,9 @@
 import breeze.linalg.{DenseMatrix, Matrix}
 
 abstract class CrfPosTaggerBase(val tags: Set[String], random: util.Random = util.Random) extends PosTagger {
-  protected final val tagList: IndexedSeq[String] = null +: tags.toIndexedSeq
+  final val tagList: IndexedSeq[String] = null +: tags.toIndexedSeq
 
-  protected final val tagToIndex: Map[String, Int] = tagList.view.zipWithIndex.toMap
+  final val tagToIndex: Map[String, Int] = tagList.view.zipWithIndex.toMap
 
   protected def wordToPossibleTags(word: String): Set[Int]
 
@@ -109,7 +109,7 @@ abstract class CrfPosTaggerBase(val tags: Set[String], random: util.Random = uti
 
   final def train(learningRate: Double,
                   regParam: Double,
-                  isConverged: (=> Int, => Double, => Double) => Boolean)
+                  isConverged: (=> Int, => Double, => Double, PosTagger) => Boolean)
                  (trainExamples: List[IndexedSeq[(String, String)]]): Double = {
     val indexedExamples = trainExamples.map(_.map({
       case (w, t) => (w, tagToIndex(t))
@@ -124,7 +124,7 @@ abstract class CrfPosTaggerBase(val tags: Set[String], random: util.Random = uti
       val regTerm = regParam / 2 * allParamIter.map(x => x * x).sum
 
       val L = indexedExamples.map(computeExampleCost).sum + regTerm
-      if (isConverged(nIter, prevL, L)) L
+      if (isConverged(nIter, prevL, L, this)) L
       else doTrain(util.Random.shuffle(indexedExamples), nIter + 1, L)
     }
 

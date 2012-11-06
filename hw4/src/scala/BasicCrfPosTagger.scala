@@ -2,11 +2,9 @@ import breeze.linalg.{CSCMatrix, DenseMatrix, Matrix}
 
 class BasicCrfPosTagger(words: Set[String],
                         tags: Set[String],
-                        wordToTagsName: Map[String, Set[String]],
+                        wordToPossibleTagNames: String => Set[String],
                         random: util.Random = util.Random) extends CrfPosTaggerBase(tags, random) {
   final val wordList: IndexedSeq[String] = words.map(_.toLowerCase).toIndexedSeq
-
-  protected final val wordToTags = wordToTagsName.mapValues(_.map(tagToIndex))
 
   protected final val wordToIndex: (String) => Int =
     ((f: String => Int) => (word: String) => if (word == null) f(word) else f(word.toLowerCase))(
@@ -14,7 +12,7 @@ class BasicCrfPosTagger(words: Set[String],
     )
 
   override final def wordToPossibleTags(word: String): Set[Int] = {
-    wordToTags.getOrElse(word.toLowerCase, (1 until tagList.size).toSet)
+    wordToPossibleTagNames(word).map(tagToIndex)
   }
 
   protected final val λtt: Matrix[Double] = {
@@ -58,11 +56,13 @@ class BasicCrfPosTagger(words: Set[String],
       case ((t, w), d) =>
         λtw(t, w) += learningRate * d
     })
+    Δλtw = null
 
     Δλtt.activeIterator.foreach({
       case ((t1, t2), d) =>
         λtt(t1, t2) += learningRate * d
     })
+    Δλtt = null
   }
 
   override def updateAllParams(f: Double => Double) {
