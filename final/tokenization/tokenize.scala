@@ -11,7 +11,9 @@
 
 import java.io.File
 
-object Mode extends Enumeration{
+val shijiDictPath: String = "../learn-vocabulary/shiji-vocab"
+
+object Mode extends Enumeration {
   val modern, classical = Value
 }
 
@@ -19,9 +21,9 @@ case class Config(inputFile: File = null, outputPath: String = null, mode: Mode.
 
 val optionParser = new scopt.immutable.OptionParser[Config]("tokenize.scala") {
   def options = Seq(
-    arg("<mode>", "tokenization mode, either " + Mode.values.mkString(" or ")){
+    arg("<mode>", "tokenization mode, either " + Mode.values.mkString(" or ")) {
       (v, c) =>
-        try{
+        try {
           c.copy(mode = Mode.withName(v))
         } catch {
           case e: Throwable =>
@@ -48,11 +50,30 @@ val optionParser = new scopt.immutable.OptionParser[Config]("tokenize.scala") {
 val config = optionParser.parse(args, Config()).getOrElse {
   sys.exit(1)
 }
-
 lazy val tokenize = config.mode match {
   case Mode.classical =>
-    // Current naive approach
-    (s: String) => s.map(_.toString)
+
+    // Simple Maximum Forward Match
+    val shijiVocab = io.Source.fromFile(shijiDictPath, "UTF-8").getLines().toSet
+    val maxLength = shijiVocab.map(_.length).max
+
+    (s: String) => {
+      val result = collection.mutable.ListBuffer[String]()
+
+      def tk(i: Int){
+        if (i < s.length) {
+          val n =
+            (maxLength to 1 by -1).
+              find(n => i + n < s.length && shijiVocab.contains(s.substring(i, i + n))).
+              getOrElse(1)
+          result += s.substring(i, i + n)
+          tk(i + n)
+        }
+      }
+      tk(0)
+
+      result.toList
+    }
 
   case Mode.modern =>
     val classifier = {
@@ -64,7 +85,7 @@ lazy val tokenize = config.mode match {
         p.setProperty("useChPos", "true")
         p.setProperty("serDictionary",
           dataDir + "dict-chris6.ser.gz," +
-          dataDir + "custom-dict")
+            shijiDictPath)
         p.setProperty("inputEncoding", "UTF-8")
         p
       }
@@ -78,7 +99,7 @@ lazy val tokenize = config.mode match {
     }
 
     import scala.collection.JavaConversions._
-    (s: String) => classifier.segmentString(s).toIndexedSeq
+    (s: String) => classifier.segmentString(s).toList
 }
 
 val writer = new java.io.PrintWriter(config.outputPath, "UTF-8")
