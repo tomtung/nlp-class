@@ -9,18 +9,23 @@
   libraryDependencies += "com.github.scopt" %% "scopt" % "2.1.0"
 */
 
+
 import java.io.File
 
-val shijiDictPath: String = "../learn-vocabulary/shiji-vocab"
-
 object Mode extends Enumeration {
-  val modern, classical = Value
+  val crf, mfm, naive = Value
 }
 
-case class Config(inputFile: File = null, outputPath: String = null, mode: Mode.Value = null)
+case class Config(inputFile: File = null,
+                  outputPath: String = null,
+                  mode: Mode.Value = null,
+                  vocabPath: Option[String] = None)
 
 val optionParser = new scopt.immutable.OptionParser[Config]("tokenize.scala") {
   def options = Seq(
+    opt("vocab", "comma separated list of vocabulary files") {
+      (v, c) => c.copy(vocabPath = Some(v))
+    },
     arg("<mode>", "tokenization mode, either " + Mode.values.mkString(" or ")) {
       (v, c) =>
         try {
@@ -51,20 +56,25 @@ val config = optionParser.parse(args, Config()).getOrElse {
   sys.exit(1)
 }
 lazy val tokenize = config.mode match {
-  case Mode.classical =>
+  case Mode.naive =>
+    (s: String) => s.map(_.toString)
 
+  case Mode.mfm =>
     // Simple Maximum Forward Match
-    val shijiVocab = io.Source.fromFile(shijiDictPath, "UTF-8").getLines().toSet
-    val maxLength = shijiVocab.map(_.length).max
+    val vocab = config.vocabPath.getOrElse("").split(',').iterator.
+      flatMap(io.Source.fromFile(_, "UTF-8").getLines()).
+      toSet
+
+    val maxLength = vocab.map(_.length).max
 
     (s: String) => {
       val result = collection.mutable.ListBuffer[String]()
 
-      def tk(i: Int){
+      def tk(i: Int) {
         if (i < s.length) {
           val n =
             (maxLength to 1 by -1).
-              find(n => i + n < s.length && shijiVocab.contains(s.substring(i, i + n))).
+              find(n => i + n < s.length && vocab.contains(s.substring(i, i + n))).
               getOrElse(1)
           result += s.substring(i, i + n)
           tk(i + n)
@@ -75,7 +85,7 @@ lazy val tokenize = config.mode match {
       result.toList
     }
 
-  case Mode.modern =>
+  case Mode.crf =>
     val classifier = {
       val dataDir: String = "../lib/stanford-segmenter-1.6.7-data/"
       val props = {
@@ -85,7 +95,7 @@ lazy val tokenize = config.mode match {
         p.setProperty("useChPos", "true")
         p.setProperty("serDictionary",
           dataDir + "dict-chris6.ser.gz," +
-            shijiDictPath)
+            config.vocabPath.getOrElse(""))
         p.setProperty("inputEncoding", "UTF-8")
         p
       }
