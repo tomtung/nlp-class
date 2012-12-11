@@ -17,10 +17,14 @@ echo 'Performing sub-sentence alignment...'
 ./hunalign-partial.scala --max-line-num 46000 hunalign-batch-jobs \
   shiji.subsent.classical shiji.subsent.modern shiji.subsent classical modern
 
-touch dict
-hunalign -text -realign -utf -cautious -thresh=0 -batch dict hunalign-batch-jobs
+touch null.dict
+hunalign -text -realign -utf -cautious -thresh=0 -batch null.dict hunalign-batch-jobs
+rm null.dict
 
 cat shiji.subsent_*.aligned > shiji.subsent.aligned
 
 echo 'Formatting result as bitext...'
 ./hunaligned-to-bitext.scala shiji.subsent.aligned shiji.subsent.aligned.classical shiji.subsent.aligned.modern
+
+sed -i "s/\s//g" shiji.subsent.aligned.classical
+sed -i "s/\s//g" shiji.subsent.aligned.modern

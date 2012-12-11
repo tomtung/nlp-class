@@ -8,12 +8,18 @@
 */
 
 import java.io.File
-case class Config(inputPath: File = null, outputPath: File = null, subsent: Boolean = false)
+case class Config(inputPath: File = null,
+                  outputPath: File = null,
+                  subSent: Boolean = false,
+                  uniPunc: Boolean = false)
 
 val optionParser = new scopt.immutable.OptionParser[Config]("sent-segment.scala") {
   def options = Seq(
     flag("subsent", "split at commas"){
-      c => c.copy(subsent = true)
+      c => c.copy(subSent = true)
+    },
+    flag("uni-punc", "for each line, replace all but last punctuation marks with '，'"){
+      c => c.copy(uniPunc = true)
     },
     arg("<input-path>", "input file path") {
       (v, c) => {
@@ -37,7 +43,7 @@ val config = optionParser.parse(args, Config()).getOrElse {
 
 def splitParagraph(paragraph: String): Array[String] = {
   val rSentEnd =
-    if (config.subsent)
+    if (config.subSent)
       "[，。；！？：](?:\\s*[”’」』])?".r
     else
       "[。；！？：](?:\\s*[”’」』])?".r
@@ -46,9 +52,15 @@ def splitParagraph(paragraph: String): Array[String] = {
   rSentEnd.replaceAllIn(paragraph, _ + nl).split(nl).map(_.trim) :+ "<p>"
 }
 
+def uniPunc(line: String): String = {
+  if (!config.uniPunc) line
+  else line.replaceAll("""[。；！？：](?!$)""", "，")
+}
+
 val writer = new java.io.PrintWriter(config.outputPath, "UTF-8")
 
 io.Source.fromFile(config.inputPath, "UTF-8").getLines().
+  map(uniPunc).
   flatMap(splitParagraph _).
   foreach(writer.println _)
 
