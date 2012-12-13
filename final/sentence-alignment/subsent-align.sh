@@ -1,12 +1,8 @@
 #! /bin/bash
 
-# Note: the script should be run after sent-align.sh
+echo 'Note: the script should be run after sent-align.sh'
 
-command -v hunalign > /dev/null || {
-    echo 'Error: hunalign not found!' >&2;
-    echo 'It is available at: http://mokk.bme.hu/resources/hunalign/' >&2;
-    exit 1;
-}
+source ../set-env.sh
 
 echo 'Splitting sentences into sub-sentences...'
 ./sent-segment.scala --subsent shiji.sent.aligned.classical shiji.subsent.classical || { exit 1; }
@@ -18,7 +14,7 @@ echo 'Performing sub-sentence alignment...'
   shiji.subsent.classical shiji.subsent.modern shiji.subsent classical modern
 
 touch null.dict
-hunalign -text -realign -utf -cautious -thresh=0 -batch null.dict hunalign-batch-jobs
+$HUNALIGN_BIN -text -realign -utf -cautious -thresh=0 -batch null.dict hunalign-batch-jobs
 rm null.dict
 
 cat shiji.subsent_*.aligned > shiji.subsent.aligned

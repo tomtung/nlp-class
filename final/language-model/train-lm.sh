@@ -1,7 +1,6 @@
 #! /bin/bash
 
-${IRSTLM:?"Environment variable undefined. Example: export IRSTLM=\$HOME/irstlm"}
-${MOSES:?"Environment variable undefined. Example: export IRSTLM=\$HOME/mosesdecoder"}
+source ../set-env.sh
 
 echo "Denoting starts and ends of sentences..."
 ./add-start-end.scala ../tokenization/shiji.tokenized.classical shiji.tokenized.sb.classical

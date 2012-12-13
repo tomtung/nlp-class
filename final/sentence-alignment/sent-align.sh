@@ -1,10 +1,6 @@
 #! /bin/bash
 
-command -v hunalign > /dev/null || {
-    echo 'Error: hunalign not found!' >&2;
-    echo 'It is available at: http://mokk.bme.hu/resources/hunalign/' >&2;
-    exit 1;
-}
+source ../set-env.sh
 
 echo 'Splitting paragraphs into sentences...'
 ./sent-segment.scala ../tokenization/shiji.tokenized.naive.classical shiji.sent.classical
@@ -12,7 +8,7 @@ echo 'Splitting paragraphs into sentences...'
 
 echo 'Performing sentence alignment...'
 touch null.dict
-hunalign -text -realign -utf -cautious -thresh=0 \
+$HUNALIGN_BIN -text -realign -utf -cautious -thresh=0 \
     null.dict ./shiji.sent.classical ./shiji.sent.modern > shiji.sent.aligned || {
         echo "Error: Something was wrong... maybe there isn't enough memory." >&2;
         echo 'This script works fine on 64bit linux with 5+G RAM.' >&2;
