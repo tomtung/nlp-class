@@ -1,0 +1,10 @@
+Evaluating baseline on dev...
+Average 1-BLEU of each line: 0.42213032046963167
+Average 2-BLEU of each line: 0.08175390868226876
+Average 3-BLEU of each line: 0.011889489569075483
+Average 4-BLEU of each line: 0.00307804868702385
+Evaluating baseline on test...
+Average 1-BLEU of each line: 0.45160292544088104
+Average 2-BLEU of each line: 0.10762635465099743
+Average 3-BLEU of each line: 0.022562193040805676
+Average 4-BLEU of each line: 0.006368035274715722

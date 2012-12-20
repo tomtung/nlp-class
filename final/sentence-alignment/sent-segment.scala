@@ -8,10 +8,14 @@
 */
 
 import java.io.File
+
+val defaultLineSep = "<p>"
+
 case class Config(inputPath: File = null,
                   outputPath: File = null,
                   subSent: Boolean = false,
-                  uniPunc: Boolean = false)
+                  uniPunc: Boolean = false,
+                  lineSep: String = defaultLineSep)
 
 val optionParser = new scopt.immutable.OptionParser[Config]("sent-segment.scala") {
   def options = Seq(
@@ -20,6 +24,9 @@ val optionParser = new scopt.immutable.OptionParser[Config]("sent-segment.scala"
     },
     flag("uni-punc", "for each line, replace all but last punctuation marks with '，'"){
       c => c.copy(uniPunc = true)
+    },
+    opt("line-sep", "string that denotes the bounderies of original lines, default " + defaultLineSep){
+      (s, c) => c.copy(lineSep = s)
     },
     arg("<input-path>", "input file path") {
       (v, c) => {
@@ -49,7 +56,7 @@ def splitParagraph(paragraph: String): Array[String] = {
       "[。；！？：](?:\\s*[”’」』])?".r
 
   val nl = sys.props("line.separator")
-  rSentEnd.replaceAllIn(paragraph, _ + nl).split(nl).map(_.trim) :+ "<p>"
+  rSentEnd.replaceAllIn(paragraph, _ + nl).split(nl).map(_.trim) :+ config.lineSep
 }
 
 def uniPunc(line: String): String = {

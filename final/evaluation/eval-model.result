@@ -1,0 +1,10 @@
+Evaluating dev result:
+Average 1-BLEU of each line: 0.5853641092331996
+Average 2-BLEU of each line: 0.20115181890579384
+Average 3-BLEU of each line: 0.05388889722090592
+Average 4-BLEU of each line: 0.015380975864181924
+Evaluating test result:
+Average 1-BLEU of each line: 0.5636170664460375
+Average 2-BLEU of each line: 0.17832543843168946
+Average 3-BLEU of each line: 0.042062849499384075
+Average 4-BLEU of each line: 0.00962662636699038
