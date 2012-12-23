@@ -121,7 +121,7 @@ def linePairsAverageNBleu(goldenTestLinePairs: List[(String, String)], n: Int): 
 
       val penalty = math.min(math.exp(1 - gl.length.asInstanceOf[Double] / tl.length), 1.0)
 
-      penalty * math.pow(precisions.reduce(_ * _), 0.25)
+      penalty * math.pow(precisions.reduce(_ * _), 1.0/n)
   })
 
   bleus.sum / bleus.size
@@ -147,7 +147,7 @@ def linePairsBleu(goldenTestLinePairs: List[(String, String)], n: Int): Double =
   val tLength = goldenTestLinePairs.map(_._2.length).sum
   val penalty = math.min(math.exp(1 - gLength.asInstanceOf[Double] / tLength), 1.0)
 
-  penalty * math.pow(precisions.reduce(_ * _), 0.25)
+  penalty * math.pow(precisions.reduce(_ * _), 1.0/n)
 }
 
 for (i <- 1 to 4) {
