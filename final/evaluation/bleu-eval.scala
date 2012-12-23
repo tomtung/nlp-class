@@ -119,12 +119,39 @@ def linePairsAverageNBleu(goldenTestLinePairs: List[(String, String)], n: Int): 
         }
       })
 
-      val penalty = math.min(tl.length / gl.length.asInstanceOf[Double], 1.0)
+      val penalty = math.min(math.exp(1 - gl.length.asInstanceOf[Double] / tl.length), 1.0)
 
-      penalty * precisions.reduce(_ * _)
+      penalty * math.pow(precisions.reduce(_ * _), 0.25)
   })
 
   bleus.sum / bleus.size
+}
+
+def linePairsBleu(goldenTestLinePairs: List[(String, String)], n: Int): Double = {
+  val precisions = (1 to n).map(i => {
+    val goldenNGramCounts = goldenTestLinePairs.map(_._1).flatMap(l => lineToNGrams(l, i)).groupBy(identity).mapValues(_.size)
+    val testNGramCounts = goldenTestLinePairs.map(_._2).flatMap(l => lineToNGrams(l, i)).groupBy(identity).mapValues(_.size)
+    
+    if (goldenNGramCounts.isEmpty) 1.0
+    else if (testNGramCounts.isEmpty) 0.0
+    else {
+      val correctNGramCounts = testNGramCounts.filterKeys(goldenNGramCounts.contains).map({
+	case (t, c) => t -> math.min(c, goldenNGramCounts(t))
+      })
+
+      correctNGramCounts.values.sum / testNGramCounts.values.sum.asInstanceOf[Double]
+    }
+  })
+  
+  val gLength = goldenTestLinePairs.map(_._1.length).sum
+  val tLength = goldenTestLinePairs.map(_._2.length).sum
+  val penalty = math.min(math.exp(1 - gLength.asInstanceOf[Double] / tLength), 1.0)
+
+  penalty * math.pow(precisions.reduce(_ * _), 0.25)
+}
+
+for (i <- 1 to 4) {
+  println(i + "-BLEU: " + linePairsBleu(goldenTestLinePairs, i))
 }
 
 for (i <- 1 to 4) {
