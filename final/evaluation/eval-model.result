@@ -1,4 +1,4 @@
-Evaluating dev result:
+Evaluating model on dev...
 1-BLEU: 0.7373351990729606
 2-BLEU: 0.55558778000121
 3-BLEU: 0.39417379888149
@@ -8,7 +8,7 @@ Average 2-BLEU of each line: 0.42923150212611627
 Average 3-BLEU of each line: 0.3228083679270255
 Average 4-BLEU of each line: 0.24271322627041714
 
-Evaluating test result:
+Evaluating model on test...
 1-BLEU: 0.7206070882097515
 2-BLEU: 0.5213202225884732
 3-BLEU: 0.3504635208486663
